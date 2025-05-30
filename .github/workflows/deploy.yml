@@ -1,4 +1,4 @@
-name: Sentiments CI - Main
+name: Sentiments CI
 
 on:
   pull_request:
