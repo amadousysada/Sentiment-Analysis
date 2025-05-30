@@ -1,0 +1,11 @@
+[project]
+name = "openclassroom-projet7-sentiment-analysis"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi[standard]>=0.115.12",
+    "mlflow>=2.22.0",
+    "opencensus-ext-azure>=1.1.14",
+]
