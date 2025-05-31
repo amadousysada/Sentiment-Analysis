@@ -60,21 +60,25 @@ spec:
   type: ClusterIP
 
 # ---------------------------
-# PostgreSQL Deployment + PVC + Service
+# PVC + for all services
 # ---------------------------
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mlflow-postgres-pvc
+  name: mlflow-pvc
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.postgresql.storage }}
+      storage: 10Gi
   storageClassName: hcloud-volumes
 
+
+# ---------------------------
+# ostgreSQL Deployment + Service
+# ---------------------------
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -104,12 +108,13 @@ spec:
             - name: POSTGRES_DB
               value: {{ .Values.postgresql.auth.database }}
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data
-              name: postgres-data
+            - mountPath: /var/lib/postgresql/mlfow_data
+              name: mlfow-postgres-data
       volumes:
         - name: postgres-data
           persistentVolumeClaim:
-            claimName: mlflow-postgres-pvc
+            claimName: mlflow-pvc
+
 ---
 apiVersion: v1
 kind: Service
@@ -126,19 +131,8 @@ spec:
   #type: ClusterIP
 
 # ---------------------------
-# MinIO StatefulSet + PVC + Service
+# MinIO StatefulSet + Service
 # ---------------------------
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: minio-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: {{ .Values.minio.storage }}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -212,9 +206,9 @@ spec:
             - name: data
               mountPath: /data
       volumes:
-        - name: data
+        - name: mlflow_minio_data
           persistentVolumeClaim:
-            claimName: minio-pvc
+            claimName: mlflow-pvc
 ---
 apiVersion: v1
 kind: Service
