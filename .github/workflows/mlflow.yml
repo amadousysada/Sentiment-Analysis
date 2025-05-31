@@ -48,9 +48,9 @@ jobs:
       run: |
         kubectl create secret docker-registry dockerhub-secret \
           --docker-server="docker.io" \
-          --docker-username=${{ env.DOCKERHUB_USERNAME }} \
-          --docker-password=${{ env.DOCKERHUB_PASSWORD }} \
-          --docker-email=${{ env.DOCKERHUB_EMAIL }} \
+          --docker-username=${{ env.DOCKER_USERNAME }} \
+          --docker-password=${{ env.DOCKER_PASSWORD }} \
+          --docker-email=${{ env.DOCKER_EMAIL }} \
           --dry-run=client -o yaml | kubectl apply -f -
 
     - name: Encode env block for mlflow
