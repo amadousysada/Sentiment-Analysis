@@ -38,6 +38,7 @@ jobs:
 
       - name: Override helm chart values
         run: |
+          ll
           envsubst < deployments/values.yml > override_values.yml
           cat override_values.yml
 
