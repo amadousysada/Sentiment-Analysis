@@ -1,0 +1,38 @@
+mlflow:
+  enabled: "${IS_MLFLOW_ENABLED}"
+  image: "${MLFLOW_IMAGE}"
+  backendStoreUri: "postgresql://${MLFLOW_DB_USER}:${MLFLOW_DB_PWD}@postgresql/${MLFLOW_DB}"
+  artifactRoot: s3://mlflow/
+
+postgresql:
+  auth:
+    user: "${MLFLOW_DB_USER}"
+    password: "${MLFLOW_DB_PWD}"
+    database: "${MLFLOW_DB}"
+  storage: 500M
+
+minio:
+  user: "${MINIO_USER}"
+  password: "${MINIO_PWD}"
+  storage: 8Gi
+
+api:
+  enabled: false
+  image: your-docker-registry/sentiment-api:latest
+
+streamlit:
+  enabled: false
+  image: your-docker-registry/streamlit-ui:latest
+
+azure:
+  instrumentationKey: <YOUR_AZURE_INSIGHT_KEY>
+
+ingress:
+  enabled: true
+  className: nginx
+  mlflow:
+    host: "${MLFLOW_HOST}"
+  api:
+    host: "${API_HOST}"
+  streamlit:
+    host: "${STREAMLIT_HOST}"
