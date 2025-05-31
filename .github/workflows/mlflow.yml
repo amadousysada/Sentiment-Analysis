@@ -25,6 +25,8 @@ jobs:
     name: "🐳 Build & Push MLflow Image !"
     runs-on: ubuntu-latest
     environment: docker-hub
+    outputs:
+      env_block: ${{ steps.step1.encode-env.test }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -82,5 +84,5 @@ jobs:
     with:
       service: mlflow
       sha: ${{ github.sha }}
-      env_block: ${{ needs.build.steps.encode-env.outputs.env_block }}
+      env_block: ${{ needs.build.outputs.env_block }}
     secrets: inherit
