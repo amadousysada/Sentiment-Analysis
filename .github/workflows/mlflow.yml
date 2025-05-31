@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'mlflow/**'
+      - '.github/workflows/mlflow.yml'
   push:
     branches: [main]
     paths:
