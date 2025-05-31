@@ -70,11 +70,11 @@ jobs:
         export IS_MLFLOW_ENABLED=true
         export MLFLOW_IMAGE=${{ env.DOCKER_USERNAME }}/mlflow:${{ env.SHA }}
         export MLFLOW_DB_USER=${{ env.MLFLOW_DB_USER }}
-        export MLFLOW_DB_PWD=${{ secrets.MLFLOW_DB_PWD }}
+        export MLFLOW_DB_PWD=${{ env.MLFLOW_DB_PWD }}
         export MLFLOW_DB=${{ env.MLFLOW_DB }}
         export MINIO_USER=${{ env.MINIO_USER }}
-        export MINIO_PWD=${{ secrets.MINIO_PWD }}
-        export MLFLOW_HOST=${{ env.MLFLOW_S3_ENDPOINT_URL }}
+        export MINIO_PWD=${{ env.MINIO_PWD }}
+        export MLFLOW_HOST=${{ env.MLFLOW_HOST }}
         EOF
         cat encoded_env.txt
         echo "env_block=$(cat encoded_env.txt)" >> $GITHUB_OUTPUT
