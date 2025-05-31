@@ -1,7 +1,7 @@
 mlflow:
   enabled: ${IS_MLFLOW_ENABLED}
   image: ${MLFLOW_IMAGE}
-  backendStoreUri: postgresql://${MLFLOW_DB_USER}:${MLFLOW_DB_PWD}@mlflow-postgres:5443/${MLFLOW_DB}
+  backendStoreUri: postgresql://${MLFLOW_DB_USER}:${MLFLOW_DB_PWD}@mlflow-postgres-service:5443/${MLFLOW_DB}
   artifactRoot: s3://mlflow/
 
 postgresql:

@@ -85,7 +85,6 @@ kind: StatefulSet
 metadata:
   name: postgres
 spec:
-  service_name: "mlflow-postgres"
   replicas: 1
   selector:
     matchLabels:
@@ -108,10 +107,10 @@ spec:
             - name: POSTGRES_DB
               value: {{ .Values.postgresql.auth.database }}
           volumeMounts:
-            - mountPath: /var/lib/postgresql/mlfow_data
-              name: mlfow-postgres-data
+            - mountPath: /var/lib/postgresql/mlflow_data
+              name: mlflow-postgres-data
       volumes:
-        - name: postgres-data
+        - name: mlflow-postgres-data
           persistentVolumeClaim:
             claimName: mlflow-pvc
 
@@ -119,9 +118,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgresql
+  name: mlflow-postgres-service
 spec:
-  ClusterIP: None
   selector:
     app: postgres
   ports:
@@ -203,10 +201,10 @@ spec:
             - containerPort: 9000
             - containerPort: 9001  # console
           volumeMounts:
-            - name: data
+            - name: mlflow-minio-data
               mountPath: /data
       volumes:
-        - name: mlflow_minio_data
+        - name: mlflow-minio-data
           persistentVolumeClaim:
             claimName: mlflow-pvc
 ---
