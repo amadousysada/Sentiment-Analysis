@@ -44,7 +44,7 @@ jobs:
 
       - name: Override helm chart values
         run: |
-          envsubst < deployments/values.yaml.yml > override_values.yaml
+          envsubst < deployments/values.yaml > override_values.yaml
           cat override_values.yaml
 
       - name: Deploy ${{ inputs.service }} via Helm
