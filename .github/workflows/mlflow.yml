@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: docker-hub
     outputs:
-      env_block: ${{ steps.step1.encode-env.test }}
+      env_block: ${{ steps.step1.encode-env.env_block }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
