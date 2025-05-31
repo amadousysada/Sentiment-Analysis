@@ -59,7 +59,7 @@ jobs:
   deploy:
     name: "🚀 Deploy MLflow with Helm"
     needs: build
-    uses: .github/workflows/deploy.yml@main
+    uses: ./github/workflows/deploy.yml@main
     with:
       service: mlflow
       sha: ${{ github.sha }}

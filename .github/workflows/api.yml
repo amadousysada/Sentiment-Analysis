@@ -40,6 +40,4 @@ jobs:
         push: true
         tags: ${{ env.DOCKER_USERNAME }}/sentiment-api:${{ env.SHA }}
 
-  deploy:
-
 
