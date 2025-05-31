@@ -76,7 +76,7 @@ jobs:
         export MINIO_PWD=${{ secrets.MINIO_PWD }}
         export MLFLOW_HOST=${{ env.MLFLOW_S3_ENDPOINT_URL }}
         EOF
-        
+        cat encoded_env.txt
         echo "env_block=$(cat encoded_env.txt)" >> $GITHUB_OUTPUT
 
   deploy:
