@@ -44,13 +44,18 @@ jobs:
         push: true
         tags: ${{ env.DOCKER_USERNAME }}/mlflow:${{ env.SHA }}
 
-    - name: Apply pod deployment
+    - name: Set up Kubeconfig
+      run: |
+        mkdir -p ~/.kube
+        echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+
+    - name: Create dockerhub secret
       run: |
         kubectl create secret docker-registry dockerhub-secret \
           --docker-server="docker.io" \
-          --docker-username=${{ env.DOCKER_USERNAME }} \
-          --docker-password=${{ env.DOCKER_PASSWORD }} \
-          --docker-email=${{ env.DOCKER_EMAIL }} \
+          --docker-username="${{ env.DOCKER_USERNAME }}" \
+          --docker-password="${{ env.DOCKER_PASSWORD }}" \
+          --docker-email="${{ env.DOCKER_EMAIL }}" \
           --dry-run=client -o yaml | kubectl apply -f -
 
     - name: Encode env block for mlflow
