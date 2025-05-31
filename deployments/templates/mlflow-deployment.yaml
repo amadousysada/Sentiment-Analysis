@@ -23,7 +23,7 @@ spec:
             - containerPort: 5000
           env:
             - name: BACKEND_STORE_URI
-              value: {{ .Values.mlflow.auth.user }}
+              value: {{ .Values.mlflow.backendStoreUri }}
             - name: ARTIFACT_ROOT
               value: {{ .Values.mlflow.artifactRoot }}
             - name: AWS_ACCESS_KEY_ID
