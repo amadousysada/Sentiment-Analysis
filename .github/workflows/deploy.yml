@@ -34,19 +34,15 @@ jobs:
           cat .envvars
           grep '^export ' .envvars | sed 's/^export //' >> $GITHUB_ENV
 
-      - name: Test exported vars
-        run: echo "Image is $MLFLOW_IMAGE"
-
-
-      #          set -a
-#          source .envvars
-#          echo "print here: ${{ MLFLOW_IMAGE }}"
-#          set +a
-
       - name: Override helm chart values
         run: |
           envsubst < deployments/values.yaml > override_values.yaml
           cat override_values.yaml
+
+      - name: Set up Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
 
       - name: Deploy ${{ inputs.service }} via Helm
         run: |
