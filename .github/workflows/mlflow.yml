@@ -67,13 +67,14 @@ jobs:
       id: encode-env
       run: |
         cat <<EOF | base64 -w 0 > encoded_env.txt
+        export IS_MLFLOW_ENABLED=true
         export MLFLOW_IMAGE=${{ env.DOCKER_USERNAME }}/mlflow:${{ env.SHA }}
         export MLFLOW_DB_USER=${{ env.MLFLOW_DB_USER }}
         export MLFLOW_DB_PWD=${{ secrets.MLFLOW_DB_PWD }}
         export MLFLOW_DB=${{ env.MLFLOW_DB }}
         export MINIO_USER=${{ env.MINIO_USER }}
         export MINIO_PWD=${{ secrets.MINIO_PWD }}
-        export MLFLOW_HOST=${{ secrets.MLFLOW_S3_ENDPOINT_URL }}
+        export MLFLOW_HOST=${{ env.MLFLOW_S3_ENDPOINT_URL }}
         EOF
         
         echo "env_block=$(cat encoded_env.txt)" >> $GITHUB_OUTPUT
