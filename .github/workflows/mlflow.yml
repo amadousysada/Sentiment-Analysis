@@ -21,7 +21,7 @@ env:
 
 jobs:
   build:
-    name: "🐳 Build & Push MLflow Image"
+    name: "🐳 Build & Push MLflow Image !"
     runs-on: ubuntu-latest
     environment: docker-hub
     steps:
