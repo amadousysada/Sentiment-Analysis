@@ -57,7 +57,7 @@ jobs:
   
 
   deploy:
-    name: "🚀 Deploy MLflow with Helm"
+    name: "🚀 Deploy MLflow with Helm !"
     needs: build
     uses: ./.github/workflows/deploy.yml
     with:
