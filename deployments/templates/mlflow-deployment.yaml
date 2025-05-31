@@ -72,10 +72,11 @@ spec:
 
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: postgres
 spec:
+  service_name: "mlflow-postgres"
   replicas: 1
   selector:
     matchLabels:
@@ -86,7 +87,7 @@ spec:
         app: postgres
     spec:
       containers:
-        - name: mlflow_postgresql
+        - name: mlflow-postgres
           image: postgres:16
           ports:
             - containerPort: 5432
@@ -110,13 +111,14 @@ kind: Service
 metadata:
   name: postgresql
 spec:
+  ClusterIP: None
   selector:
     app: postgres
   ports:
     - protocol: TCP
       port: 5432
       targetPort: 5432
-  type: ClusterIP
+  #type: ClusterIP
 
 # ---------------------------
 # MinIO StatefulSet + PVC + Service
@@ -199,7 +201,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: minio
+  name: minio-service
 spec:
   selector:
     app: minio

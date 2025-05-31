@@ -17,7 +17,17 @@ spec:
               service:
                 name: mlflow-service
                 port:
-                  number: 5000
+                  number: 443
+    - host: {{ .Values.ingress.minio.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: minio-service
+                port:
+                  number: 443
 {{- end }}
 
 {{- if and .Values.ingress.enabled .Values.api.enabled }}
@@ -64,5 +74,5 @@ spec:
               service:
                 name: streamlit-ui
                 port:
-                  number: 8501
+                  number: 443
 {{- end }}

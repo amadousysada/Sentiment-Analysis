@@ -75,6 +75,7 @@ jobs:
         export MINIO_USER=${{ vars.MINIO_USER }}
         export MINIO_PWD=${{ vars.MINIO_PWD }}
         export MLFLOW_HOST=${{ vars.MLFLOW_HOST }}
+        export MINIO_HOST=${{ vars.MINIO_HOST }}
         EOF
         cat encoded_env.txt
         echo "env_block=$(cat encoded_env.txt)" >> $GITHUB_OUTPUT

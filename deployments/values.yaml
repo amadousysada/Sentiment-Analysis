@@ -1,20 +1,22 @@
 mlflow:
   enabled: ${IS_MLFLOW_ENABLED}
   image: ${MLFLOW_IMAGE}
-  backendStoreUri: postgresql://${MLFLOW_DB_USER}:${MLFLOW_DB_PWD}@mlflow_postgresql:5443/${MLFLOW_DB}
+  backendStoreUri: postgresql://${MLFLOW_DB_USER}:${MLFLOW_DB_PWD}@mlflow-postgres:5443/${MLFLOW_DB}
   artifactRoot: s3://mlflow/
 
 postgresql:
+  enabled: ${IS_MLFLOW_ENABLED}
   auth:
     user: ${MLFLOW_DB_USER}
     password: ${MLFLOW_DB_PWD}
     database: ${MLFLOW_DB}
-  storage: 500M
+  storage: 10Gi
 
 minio:
+  enabled: ${IS_MLFLOW_ENABLED}
   user: ${MINIO_USER}
   password: ${MINIO_PWD}
-  storage: 5Gi
+  storage: 10Gi
 
 api:
   enabled: false
@@ -32,6 +34,8 @@ ingress:
   className: nginx
   mlflow:
     host: ${MLFLOW_HOST}
+  minio:
+    host: ${MINIO_HOST}
   api:
     host: ${API_HOST}
   streamlit:
