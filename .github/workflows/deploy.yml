@@ -44,10 +44,9 @@ jobs:
 
       - name: Override helm chart values
         run: |
-          deployments
-          envsubst < deployments/values.yml > override_values.yml
-          cat override_values.yml
+          envsubst < deployments/values.yaml.yml > override_values.yaml
+          cat override_values.yaml
 
       - name: Deploy ${{ inputs.service }} via Helm
         run: |
-          helm upgrade --install sentiment-stack ./sentiment-stack -f override_values.yml
+          helm upgrade --install deployments ./deployments -f override_values.yaml
