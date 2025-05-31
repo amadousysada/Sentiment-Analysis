@@ -44,6 +44,8 @@ jobs:
         context: ./mlflow
         push: true
         tags: ${{ env.DOCKER_USERNAME }}/mlflow:${{ env.SHA }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
     - name: Set up Kubeconfig
       run: |
