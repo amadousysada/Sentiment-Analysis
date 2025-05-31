@@ -32,10 +32,16 @@ jobs:
         run: |
           echo "${{ inputs.env_block }}" | base64 -d > .envvars
           cat .envvars
-          set -a
-          source .envvars
-          echo "print here: ${{ MLFLOW_IMAGE }}"
-          set +a 
+          grep '^export ' .envvars | sed 's/^export //' >> $GITHUB_ENV
+
+      - name: Test exported vars
+        run: echo "Image is $MLFLOW_IMAGE"
+
+
+      #          set -a
+#          source .envvars
+#          echo "print here: ${{ MLFLOW_IMAGE }}"
+#          set +a
 
       - name: Override helm chart values
         run: |
