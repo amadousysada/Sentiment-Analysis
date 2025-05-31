@@ -36,9 +36,15 @@ jobs:
           source .envvars
           set +a 
 
+      - name: Debug file presence
+        run: |
+          pwd
+          ls -alh
+          ls -alh deployments || true
+
       - name: Override helm chart values
         run: |
-          ll
+          deployments
           envsubst < deployments/values.yml > override_values.yml
           cat override_values.yml
 
