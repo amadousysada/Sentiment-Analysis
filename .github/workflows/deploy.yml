@@ -16,17 +16,11 @@ on:
         required: true
         type: string
 
-env:
-  DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  DOCKER_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
-  DOCKER_EMAIL: ${{ secrets.DOCKERHUB_EMAIL }}
-
 jobs:
   deploy:
-    name: "🚀 Deploying ${{ inputs.service }}"
+    name: "🚀 Deploying ${{ inputs.service }} with Helm !"
     runs-on: ubuntu-latest
-    environment: docker-hub
+    environment: hetzner
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -38,14 +32,6 @@ jobs:
 
       - name: Set up Helm
         uses: azure/setup-helm@v3
-
-      - name: Apply pod deployment
-        run: |
-          kubectl create secret docker-registry dockerhub-secret \
-            --docker-username=${{ DOCKERHUB_USERNAME }} \
-            --docker-password=${{ DOCKERHUB_PASSWORD }} \
-            --docker-email=${{ DOCKERHUB_EMAIL }} \
-            --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Decode and export variables
         run: |

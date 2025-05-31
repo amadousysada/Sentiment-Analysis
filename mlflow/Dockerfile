@@ -1,7 +1,7 @@
-FROM python:3-bullseye
+FROM python:3-slim
 LABEL authors="amadousy"
 
-COPY . /app
+COPY requirements.txt /app/requirements.txt
 
 WORKDIR /app
 

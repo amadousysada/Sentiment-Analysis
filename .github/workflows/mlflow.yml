@@ -10,10 +10,13 @@ on:
     branches: [main]
     paths:
       - 'mlflow/**'
+      - '.github/workflows/mlflow.yml'
 
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   DOCKER_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+  DOCKER_EMAIL: ${{ secrets.DOCKERHUB_EMAIL }}
   SHA: ${{ github.sha }}
 
 jobs:
@@ -41,28 +44,35 @@ jobs:
         push: true
         tags: ${{ env.DOCKER_USERNAME }}/mlflow:${{ env.SHA }}
 
+    - name: Apply pod deployment
+      run: |
+        kubectl create secret docker-registry dockerhub-secret \
+          --docker-server="docker.io" \
+          --docker-username=${{ env.DOCKERHUB_USERNAME }} \
+          --docker-password=${{ env.DOCKERHUB_PASSWORD }} \
+          --docker-email=${{ env.DOCKERHUB_EMAIL }} \
+          --dry-run=client -o yaml | kubectl apply -f -
+
     - name: Encode env block for mlflow
       id: encode-env
       run: |
         cat <<EOF | base64 -w 0 > encoded_env.txt
-        export MLFLOW_IMAGE=${{ DOCKER_USERNAME }}/mlflow:${{ SHA }}
-        export MLFLOW_DB_USER=${{ MLFLOW_DB_USER }}
+        export MLFLOW_IMAGE=${{ env.DOCKER_USERNAME }}/mlflow:${{ env.SHA }}
+        export MLFLOW_DB_USER=${{ env.MLFLOW_DB_USER }}
         export MLFLOW_DB_PWD=${{ secrets.MLFLOW_DB_PWD }}
-        export MLFLOW_DB=${{ MLFLOW_DB }}
-        export MINIO_USER=${{ MINIO_USER }}
+        export MLFLOW_DB=${{ env.MLFLOW_DB }}
+        export MINIO_USER=${{ env.MINIO_USER }}
         export MINIO_PWD=${{ secrets.MINIO_PWD }}
         export MLFLOW_HOST=${{ secrets.MLFLOW_S3_ENDPOINT_URL }}
         EOF
         
         echo "env_block=$(cat encoded_env.txt)" >> $GITHUB_OUTPUT
-  
 
   deploy:
-    name: "🚀 Deploy MLflow with Helm !"
     needs: build
     uses: ./.github/workflows/deploy.yml
     with:
       service: mlflow
       sha: ${{ github.sha }}
-      env_block: ${{ steps.encode-env.outputs.env_block }}
+      env_block: ${{ needs.build.steps.encode-env.outputs.env_block }}
     secrets: inherit
