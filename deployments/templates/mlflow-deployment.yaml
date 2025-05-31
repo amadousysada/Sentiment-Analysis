@@ -19,6 +19,11 @@ spec:
       containers:
         - name: mlflow
           image: {{ .Values.mlflow.image }}
+          args:
+            - "--host=0.0.0.0"
+            - "--port=5000"
+            - "--backend-store-uri=$(BACKEND_STORE_URI)"
+            - "--artifacts-destination=$(ARTIFACT_ROOT)"
           ports:
             - containerPort: 5000
           env:
@@ -154,11 +159,22 @@ spec:
         - name: create-bucket
           image: minio/mc:latest
           command:
-            - /bin/sh
-            - -c
+            - "bash"
+            - "-c"
             - |
-              mc alias set myminio http://minio:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD && \
-              mc mb -p myminio/mlflow || echo "bucket already exists"
+              echo "🔁 Waiting for MinIO to be available..."
+              until curl -s http://minio-service:9000/minio/health/ready; do
+                echo "⏳ Still waiting for MinIO..."
+                sleep 5
+              done
+
+              echo "✅ MinIO is up. Creating bucket..."
+              mc alias set minio http://minio-service:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD && \
+              if ! mc ls minio/mlflow; then
+                mc mb minio/bucket
+              else
+                echo 'bucket already exists'
+              fi
           env:
             - name: MINIO_ROOT_USER
               valueFrom:
