@@ -155,37 +155,37 @@ spec:
       labels:
         app: minio
     spec:
-      initContainers:
-        - name: create-bucket
-          image: minio/mc:latest
-          command:
-            - "bash"
-            - "-c"
-            - |
-              echo "🔁 Waiting for MinIO to be available..."
-              until curl -s http://minio-service:9000/minio/health/ready; do
-                echo "⏳ Still waiting for MinIO..."
-                sleep 5
-              done
-
-              echo "✅ MinIO is up. Creating bucket..."
-              mc alias set minio http://minio-service:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD && \
-              if ! mc ls minio/mlflow; then
-                mc mb minio/bucket
-              else
-                echo 'bucket already exists'
-              fi
-          env:
-            - name: MINIO_ROOT_USER
-              valueFrom:
-                secretKeyRef:
-                  name: sentiments-stack-secrets
-                  key: minio_user
-            - name: MINIO_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: sentiments-stack-secrets
-                  key: minio_password
+#      initContainers:
+#        - name: create-bucket
+#          image: minio/mc:latest
+#          command:
+#            - "bash"
+#            - "-c"
+#            - |
+#              echo "🔁 Waiting for MinIO to be available..."
+#              until curl -s http://minio-service:9000/minio/health/ready; do
+#                echo "⏳ Still waiting for MinIO..."
+#                sleep 5
+#              done
+#
+#              echo "✅ MinIO is up. Creating bucket..."
+#              mc alias set minio http://minio-service:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD && \
+#              if ! mc ls minio/mlflow; then
+#                mc mb minio/bucket
+#              else
+#                echo 'bucket already exists'
+#              fi
+#          env:
+#            - name: MINIO_ROOT_USER
+#              valueFrom:
+#                secretKeyRef:
+#                  name: sentiments-stack-secrets
+#                  key: minio_user
+#            - name: MINIO_ROOT_PASSWORD
+#              valueFrom:
+#                secretKeyRef:
+#                  name: sentiments-stack-secrets
+#                  key: minio_password
       containers:
         - name: minio
           image: minio/minio
