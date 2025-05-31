@@ -22,6 +22,8 @@ spec:
           ports:
             - containerPort: 5000
           env:
+            - name: MLFLOW_S3_ENDPOINT_URL
+              value: http://minio:9000
             - name: BACKEND_STORE_URI
               value: {{ .Values.mlflow.backendStoreUri }}
             - name: ARTIFACT_ROOT
@@ -84,8 +86,8 @@ spec:
         app: postgres
     spec:
       containers:
-        - name: postgres
-          image: postgres:13
+        - name: mlflow_postgresql
+          image: postgres:16
           ports:
             - containerPort: 5432
           env:
@@ -153,7 +155,7 @@ spec:
             - /bin/sh
             - -c
             - |
-              mc alias set myminio http://localhost:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD && \
+              mc alias set myminio http://minio:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD && \
               mc mb -p myminio/mlflow || echo "bucket already exists"
           env:
             - name: MINIO_ROOT_USER
@@ -185,6 +187,7 @@ spec:
                   key: minio_password
           ports:
             - containerPort: 9000
+            - containerPort: 9001  # console
           volumeMounts:
             - name: data
               mountPath: /data
@@ -201,8 +204,13 @@ spec:
   selector:
     app: minio
   ports:
-    - protocol: TCP
+    - name: api
+      protocol: TCP
       port: 9000
       targetPort: 9000
-  type: ClusterIP
+    - name: console
+      protocol: TCP
+      port: 9001
+      targetPort: 9001
+  type: LoadBalancer
 {{- end }}
