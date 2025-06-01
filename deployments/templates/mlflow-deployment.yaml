@@ -20,11 +20,11 @@ spec:
         - name: mlflow
           image: {{ .Values.mlflow.image }}
           args:
-            - "--host=0.0.0.0"
-            - "--port=5000"
-            - "--backend-store-uri=$(BACKEND_STORE_URI)"
-            - "--artifacts-destination=$(ARTIFACT_ROOT)"
-            - "--workers=1"
+            - --host=0.0.0.0
+            - --port=5000"
+            - --backend-store-uri={{ .Values.mlflow.backendStoreUri }}
+            - --artifacts-destination={{ .Values.mlflow.artifactRoot }}
+            - --workers=1
           ports:
             - containerPort: 5000
           env:
