@@ -17,7 +17,7 @@ spec:
               service:
                 name: mlflow-service
                 port:
-                  number: 443
+                  number: 5000
     - host: {{ .Values.ingress.minio.host }}
       http:
         paths:
@@ -27,7 +27,7 @@ spec:
               service:
                 name: minio-service
                 port:
-                  number: 443
+                  number: 9001
 {{- end }}
 
 {{- if and .Values.ingress.enabled .Values.api.enabled }}

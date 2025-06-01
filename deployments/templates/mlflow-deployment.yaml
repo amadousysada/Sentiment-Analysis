@@ -24,11 +24,12 @@ spec:
             - "--port=5000"
             - "--backend-store-uri=$(BACKEND_STORE_URI)"
             - "--artifacts-destination=$(ARTIFACT_ROOT)"
+            - "--workers=1"
           ports:
             - containerPort: 5000
           env:
             - name: MLFLOW_S3_ENDPOINT_URL
-              value: http://minio:9000
+              value: http://minio-service:9000
             - name: BACKEND_STORE_URI
               value: {{ .Values.mlflow.backendStoreUri }}
             - name: ARTIFACT_ROOT

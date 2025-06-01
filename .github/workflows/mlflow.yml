@@ -82,6 +82,7 @@ jobs:
 
   deploy:
     needs: build
+    name: "🚀 Deploying"
     uses: ./.github/workflows/deploy.yml
     with:
       service: mlflow
