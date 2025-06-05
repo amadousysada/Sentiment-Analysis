@@ -5,6 +5,7 @@ metadata:
   name: mlflow-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingress.proxyBodySize | default "1m" }}
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   rules:

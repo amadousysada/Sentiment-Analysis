@@ -32,6 +32,7 @@ azure:
 ingress:
   enabled: true
   className: nginx
+  proxyBodySize: 30m
   mlflow:
     host: ${MLFLOW_HOST}
   minio:
