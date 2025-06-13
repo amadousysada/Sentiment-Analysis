@@ -19,15 +19,15 @@ minio:
   storage: 10Gi
 
 api:
-  enabled: false
-  image: your-docker-registry/sentiment-api:latest
+  enabled: ${IS_API_ENABLED}
+  image: ${API_IMAGE}
+  mlflowTrackingUrl: ${MLFLOW_TRACKING_URI}
+  appInsightString: ${APPLICATIONINSIGHTS_CONNECTION_STRING}
+  serviceName: ${SERVICE_NAME}
 
 streamlit:
   enabled: false
   image: your-docker-registry/streamlit-ui:latest
-
-azure:
-  instrumentationKey: <YOUR_AZURE_INSIGHT_KEY>
 
 ingress:
   enabled: true

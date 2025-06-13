@@ -1,46 +1,65 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-import mlflow.sklearn
-import joblib
-import numpy as np
-import mlflow
+from __future__ import annotations
+
+import asyncio
 import logging
-from opencensus.ext.azure.log_exporter import AzureLogHandler
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+import mlflow
+from fastapi import FastAPI
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
 
-client = mlflow.tracking.MlflowClient()
-experiment = client.get_experiment_by_name("sentiment_analysis_tf")
-latest_run = client.search_runs([experiment.experiment_id], order_by=["start_time DESC"], max_results=1)[0]
-model_uri = f"runs:/{latest_run.info.run_id}/model"
-model = mlflow.sklearn.load_model(model_uri)
-vectorizer = joblib.load("tfidf.joblib")
+from routes import MODEL_MAP, models, router
+from settings import get_settings
 
-# Logger vers Azure
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-logger.addHandler(AzureLogHandler(connection_string="InstrumentationKey=USE_ENV_VAR_OR_SECRET"))
 
-class TextInput(BaseModel):
-    text: str
+conf = get_settings()
 
-class Feedback(BaseModel):
-    text: str
-    prediction: int
-    validated: bool
 
-@app.post("/predict")
-def predict_sentiment(input: TextInput):
-    X = vectorizer.transform([input.text])
-    pred = model.predict(X)
-    return {"prediction": int(pred[0])}
+DEFAULT_THRESHOLD = conf.DEFAULT_THRESHOLD
+MLFLOW_TRACKING_URI = conf.MLFLOW_TRACKING_URI
+mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 
-@app.post("/feedback")
-def submit_feedback(feedback: Feedback):
-    logger.warning("Prediction Feedback", extra={
-        'custom_dimensions': {
-            'text': feedback.text,
-            'prediction': feedback.prediction,
-            'validated': feedback.validated
-        }
-    })
-    return {"status": "feedback logged"}
+async def load_models():
+    for name, slug in MODEL_MAP.items():
+        try:
+            logger.info("Loading model '%s' ......", slug)
+            run = mlflow.search_runs(experiment_names=[slug], order_by=["metrics.loss ASC"], max_results=1)
+            uri = f"runs:/{run.iloc[0]['run_id']}/model-artifact"
+            models[name] = mlflow.pyfunc.load_model(uri)
+            logger.info("Loaded model '%s' from %s", name, uri)
+        except Exception as exc:  # noqa: BLE001
+            logger.error("Failed loading model %s, %s: %s", uri, name, exc)
+            raise
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):  # noqa: D401
+    stop_event = asyncio.Event()
+
+    async def _background_loader():
+        try:
+            await load_models()
+        finally:
+            await stop_event.wait()  # attends le signal de shutdown
+
+    task = asyncio.create_task(_background_loader())
+
+    try:
+        yield
+    finally:
+        stop_event.set()
+        await task
+        logger.info("🧹 Models cleared from memory")
+        models.clear()
+
+app = FastAPI(title="Sentiment API", version="1.0.0", lifespan=lifespan)
+
+FastAPIInstrumentor.instrument_app(app)
+RequestsInstrumentor().instrument()
+
+# Include all routes
+app.include_router(router=router)

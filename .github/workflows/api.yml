@@ -5,14 +5,18 @@ on:
     branches: [ main ]
     paths:
       - 'api/**'
+      - '.github/workflows/api.yml'
   push:
     branches: [main]
     paths:
       - 'api/**'
+      - '.github/workflows/api.yml'
 
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   DOCKER_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+  DOCKER_EMAIL: ${{ secrets.DOCKERHUB_EMAIL }}
   SHA: ${{ github.sha }}
 
 jobs:
@@ -20,6 +24,8 @@ jobs:
     name: "🐳 Build & Push API Image"
     runs-on: ubuntu-latest
     environment: docker-hub
+    outputs:
+      env_block: ${{ steps.encode-env.outputs.env_block }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -33,11 +39,50 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build api image
+    - name: Build and push api image
       uses: docker/build-push-action@v6
       with:
         context: ./api
         push: true
         tags: ${{ env.DOCKER_USERNAME }}/sentiment-api:${{ env.SHA }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Set up Kubeconfig
+      run: |
+        mkdir -p ~/.kube
+        echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+
+    - name: Create dockerhub secret
+      run: |
+        kubectl create secret docker-registry dockerhub-secret \
+          --docker-server="docker.io" \
+          --docker-username="${{ env.DOCKER_USERNAME }}" \
+          --docker-password="${{ env.DOCKER_PASSWORD }}" \
+          --docker-email="${{ env.DOCKER_EMAIL }}" \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Encode env block for mlflow
+      id: encode-env
+      run: |
+        cat <<EOF | base64 -w 0 > encoded_env.txt
+        export IS_API_ENABLED=true
+        export API_IMAGE=${{ env.DOCKER_USERNAME }}/sentiment-api:${{ env.SHA }}
+        export MLFLOW_TRACKING_URI=https://${{ vars.MLFLOW_HOST }}
+        export APPLICATIONINSIGHTS_CONNECTION_STRING=${{ vars.APPLICATIONINSIGHTS_CONNECTION_STRING }}
+        export SERVICE_NAME=${{ vars.SERVICE_NAME }}
+        EOF
+        cat encoded_env.txt
+        echo "env_block=$(cat encoded_env.txt)" >> $GITHUB_OUTPUT
+
+  deploy:
+    needs: build
+    name: "🚀 Deploying"
+    uses: ./.github/workflows/deploy.yml
+    with:
+      service: api
+      sha: ${{ github.sha }}
+      env_block: ${{ needs.build.outputs.env_block }}
+    secrets: inherit
 
 
