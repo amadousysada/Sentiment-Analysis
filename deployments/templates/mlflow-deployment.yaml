@@ -62,7 +62,7 @@ spec:
   type: ClusterIP
 
 # ---------------------------
-# PVC + for all services
+# PVC for minio
 # ---------------------------
 ---
 apiVersion: v1
@@ -77,6 +77,22 @@ spec:
       storage: 10Gi
   storageClassName: hcloud-volumes
 
+
+# ---------------------------
+# PVC for postgres
+# ---------------------------
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mlflow-pg-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: hcloud-volumes
 
 # ---------------------------
 # ostgreSQL Deployment + Service
@@ -110,12 +126,11 @@ spec:
               value: {{ .Values.postgresql.auth.database }}
           volumeMounts:
             - mountPath: /var/lib/postgresql/mlflow_data
-              name: mlflow-shared-data
-              subpath: postgres
+              name: mlflow-pg-data
       volumes:
-        - name: mlflow-shared-data
+        - name: mlflow-pg-data
           persistentVolumeClaim:
-            claimName: mlflow-pvc
+            claimName: mlflow-pg-pvc
 
 ---
 apiVersion: v1
@@ -204,11 +219,10 @@ spec:
             - containerPort: 9000
             - containerPort: 9001  # console
           volumeMounts:
-            - name: mlflow-shared-data
+            - name: mlflow-minio-data
               mountPath: /data
-              subpath: minio
       volumes:
-        - name: mlflow-shared-data
+        - name: mlflow-minio-data
           persistentVolumeClaim:
             claimName: mlflow-pvc
 ---
