@@ -110,9 +110,10 @@ spec:
               value: {{ .Values.postgresql.auth.database }}
           volumeMounts:
             - mountPath: /var/lib/postgresql/mlflow_data
-              name: mlflow-postgres-data
+              name: mlflow-shared-data
+              subpath: postgres
       volumes:
-        - name: mlflow-postgres-data
+        - name: mlflow-shared-data
           persistentVolumeClaim:
             claimName: mlflow-pvc
 
@@ -203,10 +204,11 @@ spec:
             - containerPort: 9000
             - containerPort: 9001  # console
           volumeMounts:
-            - name: mlflow-minio-data
+            - name: mlflow-shared-data
               mountPath: /data
+              subpath: minio
       volumes:
-        - name: mlflow-minio-data
+        - name: mlflow-shared-data
           persistentVolumeClaim:
             claimName: mlflow-pvc
 ---
