@@ -1,4 +1,3 @@
-{{- if .Values.mlflow.enabled }}
 # ---------------------------
 # MLflow Deployment + Service
 # ---------------------------
@@ -243,4 +242,3 @@ spec:
       port: 9001
       targetPort: 9001
   type: LoadBalancer
-{{- end }}

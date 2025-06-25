@@ -5,11 +5,13 @@ on:
     branches: [ main ]
     paths:
       - 'mlflow/**'
+      - 'deployments/mlflow-minio/**'
       - '.github/workflows/mlflow.yml'
   push:
     branches: [main]
     paths:
       - 'mlflow/**'
+      - 'deployments/mlflow-minio/**'
       - '.github/workflows/mlflow.yml'
   workflow_dispatch:
 
@@ -85,7 +87,8 @@ jobs:
     name: "🚀 Deploying"
     uses: ./.github/workflows/deploy.yml
     with:
-      service: mlflow
+      service: "mlflow-minio"
+      release_name: "mlflow-minio"
       sha: ${{ github.sha }}
       env_block: ${{ needs.build.outputs.env_block }}
     secrets: inherit

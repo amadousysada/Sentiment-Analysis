@@ -7,6 +7,10 @@ on:
         default: "Le service à deployer"
         required: true
         type: string
+      release_name:
+        default: "Le nom du release"
+        required: true
+        type: string
       sha:
         description: "Le SHA du commit"
         required: true
@@ -36,7 +40,7 @@ jobs:
 
       - name: Override helm chart values
         run: |
-          envsubst < deployments/values.yaml > override_values.yaml
+          envsubst < deployments/${{ inputs.service }}/values.yaml > override_values.yaml
           cat override_values.yaml
 
       - name: Set up Kubeconfig
@@ -46,4 +50,4 @@ jobs:
 
       - name: Deploy ${{ inputs.service }} via Helm
         run: |
-          helm upgrade --install deployments ./deployments -f override_values.yaml
+          helm upgrade --install ${{ inputs.release_name }} ./deployments/${{ inputs.service }} -f override_values.yaml
