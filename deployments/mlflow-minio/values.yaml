@@ -5,6 +5,7 @@ mlflow:
 
 postgresql:
   auth:
+    user: ${MLFLOW_DB_USER}
     password: ${MLFLOW_DB_PWD}
     database: ${MLFLOW_DB}
   storage: 10Gi
