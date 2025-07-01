@@ -26,7 +26,7 @@ import pandas as pd
 STREAMLIT_API_URL = os.getenv("STREAMLIT_API_URL", "http://localhost:8000").rstrip('/')
 
 st.set_page_config(page_title="Sentiment Analysis", layout="centered")
-st.title("Sentiment Analysis App with Feedback")
+st.title("Sentiment Analysis App")
 
 # 1. Récupérer la liste des modèles disponibles
 try:
@@ -48,7 +48,7 @@ selected_model = st.radio("Choisissez un modèle", models)
 user_input = st.text_area(
     "Entrez une ou plusieurs phrases (une par ligne)",
     height=150,
-    placeholder="Ex: Je suis très content de ce produit\nEx: C'était une mauvaise expérience"
+    placeholder="Ex: Just missed my connection because SkyHigh Airways delayed my flight 4 hours with no explanation. #neveragain #airline"
 )
 
 # 4. Slider pour ajuster le seuil (optionnel)

@@ -20,9 +20,10 @@ models: Dict[str, mlflow.pyfunc.PyFuncModel] = {}
 prediction_counter, feedback_counter = get_metrics()
 
 MODEL_MAP = {
-    'model simple (logististic reg)': 'word2vec-logistic-regression-with-optimized-hyperparameters',
-    'model avancé': 'fasttext-lstm-advanced-model',
-    'model bert': 'bert-model'
+    #'model simple (logististic reg)': 'word2vec-logistic-regression-with-optimized-hyperparameters',
+    #'model avancé': 'fasttext-lstm-advanced-model',
+    'model avancé': 'bert-model',
+    #'model bert': 'bert-model'
 }
 
 LABEL_MAP = {
@@ -31,9 +32,10 @@ LABEL_MAP = {
 }
 
 TOKENIZER_MAP = {
-    "model simple (logististic reg)": w2vec_tokenizer,
-    "model avancé": ftext_tokenizer,
-    "model bert": bert_tokenize
+    #"model simple (logististic reg)": w2vec_tokenizer,
+    #"model avancé": ftext_tokenizer,
+    "model avancé": bert_tokenize,
+    #"model bert": bert_tokenize
 }
 
 class PredictRequest(BaseModel):

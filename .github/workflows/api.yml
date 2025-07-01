@@ -5,12 +5,14 @@ on:
     branches: [ main ]
     paths:
       - 'api/**'
+      - 'front/**'
       - 'deployments/api-front/**'
       - '.github/workflows/api.yml'
   push:
     branches: [main]
     paths:
       - 'api/**'
+      - 'front/**'
       - 'deployments/api-front/**'
       - '.github/workflows/api.yml'
   workflow_dispatch:
@@ -51,6 +53,15 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
+    - name: Build and push front image
+      uses: docker/build-push-action@v6
+      with:
+        context: ./front
+        push: true
+        tags: ${{ env.DOCKER_USERNAME }}/streamlit-front:${{ env.SHA }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
     - name: Set up Kubeconfig
       run: |
         mkdir -p ~/.kube
@@ -73,6 +84,10 @@ jobs:
         export API_IMAGE=${{ env.DOCKER_USERNAME }}/sentiment-api:${{ env.SHA }}
         export MLFLOW_TRACKING_URI=https://${{ vars.MLFLOW_HOST }}
         export APPLICATIONINSIGHTS_CONNECTION_STRING=${{ vars.APPLICATIONINSIGHTS_CONNECTION_STRING }}
+        export API_HOST=${{ vars.MLFLOW_HOST }}
+        export SERVICE_NAME=${{ vars.SERVICE_NAME }}
+        export STREAMLIT_IMAGE=${{ vars.STREAMLIT_IMAGE }}
+        export API_URL=${{ vars.API_HOST }}
         export SERVICE_NAME=${{ vars.SERVICE_NAME }}
         EOF
         cat encoded_env.txt

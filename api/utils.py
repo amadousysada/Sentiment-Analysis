@@ -3,6 +3,7 @@ import string
 
 import nltk
 import numpy as np
+import pandas as pd
 import tensorflow_hub as hub
 import tensorflow_text as tf_text  # noqa: F401
 from gensim.models import FastText, Word2Vec
@@ -10,6 +11,10 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 
+
+#tokens = pd.DataFrame(np.load("models/tokens.npy", allow_pickle=True), columns=["tokens"])
+
+#ft_model = FastText(tokens, vector_size=300, window=5, min_count=1)
 tfhub_handle_encoder = "https://tfhub.dev/tensorflow/small_bert/bert_en_uncased_L-12_H-768_A-12/1"
 tfhub_handle_preprocess = "https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3"
 
@@ -86,26 +91,26 @@ def _average_vector(tokens: list[str], model, vector_size: int, generate_missing
             vectors.append(np.zeros(vector_size))
     return np.mean(vectors, axis=0)
 
-def sentence_to_sequence(tokens, model_embedding, max_len=16, dim=300):
-    vectors = [model_embedding.wv[word] if word in model_embedding.wv else np.zeros(dim) for word in tokens]
+def sentence_to_sequence(_tokens, model_embedding, max_len=16, dim=300):
+    vectors = [model_embedding.wv[word] if word in model_embedding.wv else np.zeros(dim) for word in _tokens]
     # Padding or trimming
     vectors = vectors[:max_len] + [np.zeros(dim)] * (max_len - len(vectors))
     return np.array(vectors)
 
-def bert_tokenize(tokens):
-    text_preprocessed = bert_preprocess([" ".join(tokens)])
+def bert_tokenize(_tokens):
+    text_preprocessed = bert_preprocess([" ".join(_tokens)])
     embeddings = bert_encoder(text_preprocessed)['pooled_output']
 
     return embeddings.numpy()
 
-def w2vec_tokenizer(tokens):
-    model = Word2Vec([tokens], min_count=1, vector_size=300, window=5)
-    vec = _average_vector(tokens, model, vector_size=300).reshape(1, -1)
+def w2vec_tokenizer(_tokens):
+    model = Word2Vec([_tokens], min_count=1, vector_size=300, window=5)
+    vec = _average_vector(_tokens, model, vector_size=300).reshape(1, -1)
     vec = vec.astype(np.float64)
     return  vec
 
-def ftext_tokenizer(tokens):
-    model = FastText([tokens], vector_size=300, window=5, min_count=1)
-    emb = sentence_to_sequence(tokens, model)
-    emb = np.expand_dims(emb, axis=0).astype(np.float64)
-    return emb
+def ftext_tokenizer(_tokens):
+    #emb = sentence_to_sequence(_tokens, ft_model)
+    #emb = np.expand_dims(emb, axis=0).astype(np.float64)
+    #print(emb)
+    return None

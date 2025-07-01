@@ -6,8 +6,8 @@ api:
   serviceName: ${SERVICE_NAME}
 
 streamlit:
-  enabled: false
-  image: your-docker-registry/streamlit-ui:latest
+  enabled: true
+  image: ${STREAMLIT_IMAGE}
 
 ingress:
   enabled: true

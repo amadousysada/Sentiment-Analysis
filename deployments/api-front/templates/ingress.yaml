@@ -42,5 +42,5 @@ spec:
               service:
                 name: streamlit-ui
                 port:
-                  number: 443
+                  number: 8501
 {{- end }}
