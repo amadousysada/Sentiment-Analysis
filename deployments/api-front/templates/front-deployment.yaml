@@ -11,7 +11,7 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sentiments-front
+  name: sentiments-front-deployment
 spec:
   replicas: {{ .Values.streamlit.replicas | default 1 }}
   selector:

@@ -13,16 +13,16 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sentiments-api
+  name: sentiments-api-deployment
 spec:
   replicas: {{ .Values.api.replicas | default 1 }}
   selector:
     matchLabels:
-      app: api
+      app: sentiments-api
   template:
     metadata:
       labels:
-        app: api
+        app: sentiments-api
     spec:
       containers:
         - name: api

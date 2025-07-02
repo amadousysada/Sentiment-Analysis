@@ -84,8 +84,9 @@ jobs:
         export API_IMAGE=${{ env.DOCKER_USERNAME }}/sentiment-api:${{ env.SHA }}
         export MLFLOW_TRACKING_URI=https://${{ vars.MLFLOW_HOST }}
         export APPLICATIONINSIGHTS_CONNECTION_STRING=${{ vars.APPLICATIONINSIGHTS_CONNECTION_STRING }}
-        export API_HOST=${{ vars.MLFLOW_HOST }}
+        export API_HOST=${{ vars.API_HOST }}
         export SERVICE_NAME=${{ vars.SERVICE_NAME }}
+        export STREAMLIT_HOST=${{ vars.STREAMLIT_HOST }}
         export STREAMLIT_IMAGE=${{ env.DOCKER_USERNAME }}/streamlit-front:${{ env.SHA }}
         EOF
         cat encoded_env.txt

@@ -17,7 +17,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: sentiment-api
+                name: sentiments-api-service
                 port:
                   number: 8000
 {{- end }}
@@ -40,7 +40,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: streamlit-ui
+                name: sentiments-front-service
                 port:
                   number: 8501
 {{- end }}
