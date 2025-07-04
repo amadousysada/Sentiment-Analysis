@@ -30,12 +30,15 @@ st.title("Sentiment Analysis App")
 
 # 1. Récupérer la liste des modèles disponibles
 try:
-    resp = requests.get(f"{STREAMLIT_API_URL}/models")
-    resp.raise_for_status()
-    models = resp.json().get("models", [])
+    if "models" not in st.session_state:
+        with st.spinner("Loading models…"):
+            st.session_state.models = requests.get(f"{STREAMLIT_API_URL}/models/").json()["models"]
+
 except Exception as e:
     st.error(f"Impossible de récupérer la liste des modèles : {e}")
     st.stop()
+
+models = st.session_state.models
 
 if not models:
     st.error("Aucun modèle disponible depuis l'API.")
@@ -63,13 +66,14 @@ threshold = st.slider(
 # Variables to hold last prediction
 last_probs = []
 last_labels = []
-
+if "results" not in st.session_state:
+    st.session_state.results = []
 # 5. Bouton pour envoyer la requête de prédiction
 if st.button("Predict"):
     if not user_input.strip():
         st.error("⚠️ Veuillez entrer au moins une phrase.")
     else:
-        predict_url = f"{STREAMLIT_API_URL}/predict/"
+        predict_url = f"{STREAMLIT_API_URL}/predict"
         payload = {
             "text": user_input,
             "model_name": selected_model,
@@ -86,53 +90,51 @@ if st.button("Predict"):
             last_labels = data.get("labels", [])
 
             # Construire un DataFrame pour l'affichage
-            results = []
+            st.session_state.results = []
             for prob, lbl in zip(last_probs, last_labels):
-                results.append({"probability": prob, "label": lbl})
-            df = pd.DataFrame(results)
+                st.session_state.results.append({"probability": prob, "label": lbl})
+            df = pd.DataFrame(st.session_state.results)
 
             st.subheader("Résultats de la prédiction")
             st.dataframe(df)
-
-            # Afficher les boutons de feedback
-            st.markdown("---")
-            st.write("**Votre retour : la prédiction est-elle correcte ?**")
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("👍 Correct"):
-                    feedback_payload = {
-                        "text": user_input,
-                        "model": selected_model,
-                        "probability": results[0]['probability'],
-                        "validated": True
-                    }
-                    try:
-                        resp_fb = requests.post(f"{STREAMLIT_API_URL}/feedback", json=feedback_payload)
-                        resp_fb.raise_for_status()
-                        st.success("Merci pour votre retour ! 🙏")
-                    except Exception as e:
-                        st.error(f"Échec de l'envoi du feedback : {e}")
-            with col2:
-                if st.button("👎 Incorrect"):
-                    feedback_payload = {
-                        "text": user_input,
-                        "model": selected_model,
-                        "probability": results[0]['probability'],
-                        "validated": False
-                    }
-                    try:
-                        resp_fb = requests.post(f"{STREAMLIT_API_URL}/feedback", json=feedback_payload)
-                        resp_fb.raise_for_status()
-                        st.success("Merci pour votre retour ! 🙏")
-                    except Exception as e:
-                        st.error(f"Échec de l'envoi du feedback : {e}")
-
         except requests.exceptions.HTTPError as errh:
             st.error(f"Requête HTTP échouée : {errh}")
         except requests.exceptions.RequestException as err:
             st.error(f"Erreur réseau ou timeout : {err}")
         except Exception as e:
             st.error(f"Erreur inattendue : {e}")
+
+
+# Afficher les boutons de feedback
+
+if st.session_state.results:
+    st.markdown("---")
+    st.write("**Votre retour : la prédiction est-elle correcte ?**")
+    col1, col2 = st.columns(2)
+    feedback_payload = {
+        "text": user_input,
+        "model": selected_model,
+        "probability": st.session_state.results[0]['probability'],
+        "predicted_sentiment": st.session_state.results[0]['label'],
+        "validated": True
+    }
+    with col1:
+        if st.button("👍 Correct"):
+            try:
+                resp_fb = requests.post(f"{STREAMLIT_API_URL}/feedback", json=feedback_payload)
+                resp_fb.raise_for_status()
+                st.success("Merci pour votre retour ! 🙏")
+            except Exception as e:
+                st.error(f"Échec de l'envoi du feedback : {e}")
+    with col2:
+        if st.button("👎 Incorrect"):
+            feedback_payload["validated"] = False
+            try:
+                resp_fb = requests.post(f"{STREAMLIT_API_URL}/feedback", json=feedback_payload)
+                resp_fb.raise_for_status()
+                st.success("Merci pour votre retour ! 🙏")
+            except Exception as e:
+                st.error(f"Échec de l'envoi du feedback : {e}")
 
 # 6. Afficher l'URL de l'API pour debug
 st.sidebar.markdown("---")

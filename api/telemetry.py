@@ -38,9 +38,17 @@ def get_metrics():
         "sentiment_api_prediction_count",
         description="Number of predictions made",
     )
-    feedback_counter = meter.create_counter(
+    total_feedback_counter = meter.create_counter(
         "sentiment_api_feedback_count",
-        description="Number of feedback events",
+        description="Number of total feedback events",
+    )
+    positive_feedback_counter = meter.create_counter(
+        "sentiment_api_positive_feedback",
+        description="Number of positive feedback events",
+    )
+    negative_feedback_counter = meter.create_counter(
+        "sentiment_api_negative_feedback",
+        description="Number of negative feedback events",
     )
 
-    return prediction_counter, feedback_counter
+    return prediction_counter, total_feedback_counter, positive_feedback_counter, negative_feedback_counter

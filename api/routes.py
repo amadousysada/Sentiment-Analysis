@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 models: Dict[str, mlflow.pyfunc.PyFuncModel] = {}
 
-prediction_counter, feedback_counter = get_metrics()
+prediction_counter, total_feedback_counter, positive_feedback_counter, negative_feedback_counter = get_metrics()
 
 MODEL_MAP = {
     #'model simple (logististic reg)': 'word2vec-logistic-regression-with-optimized-hyperparameters',
@@ -52,6 +52,7 @@ class FeedbackRequest(BaseModel):
     text: str
     probability: float
     validated: bool
+    predicted_sentiment: str
 
 @lru_cache
 def get_models() -> dict[str, mlflow.pyfunc.PyFuncModel]:
@@ -110,16 +111,45 @@ async def predict(
     return PredictResponse(probabilities=proba, labels=labels, model=model_name)
 
 
-@router.post("/feedback")
+@router.post("/feedback/")
 async def feedback(req: FeedbackRequest):
     # increment feedback metric
-    feedback_counter.add(1, {"model": req.model, "validated": str(req.validated)})
+    total_feedback_counter.add(
+        1,
+        {
+            "model": req.model,
+            "validated": str(req.validated),
+            "text": req.text,
+            "probability": req.probability,
+            "predicted_sentiment": req.predicted_sentiment
+        }
+    )
     if not req.validated:
+        negative_feedback_counter.add(
+            1,
+            {
+                "model": req.model,
+                "validated": str(req.validated),
+                "text": req.text,
+                "probability": req.probability,
+                "predicted_sentiment": req.predicted_sentiment
+            }
+        )
         logger.warning(
-            "Prediction invalid: model=%s text=%s prob=%.3f",
-            req.model, req.text, req.probability,
+            "Prediction invalid: model=%s text=%s prob=%.3f sentiment=%s",
+            req.model, req.text, req.probability,req.predicted_sentiment
         )
     else:
+        positive_feedback_counter.add(
+            1,
+            {
+                "model": req.model,
+                "validated": str(req.validated),
+                "text": req.text,
+                "probability": req.probability,
+                "predicted_sentiment": req.predicted_sentiment
+            }
+        )
         logger.info(
             "Prediction validated: model=%s text=%s prob=%.3f",
             req.model, req.text, req.probability,
